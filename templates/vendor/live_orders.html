@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+
+{% block title %}Kanban Live Orders - {{ vendor.name }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4 py-3">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h2 class="fw-bold mb-1"><i class="fa-solid fa-kanban text-primary me-2"></i> Live Kanban Order Board</h2>
+      <p class="text-muted mb-0">Drag or click order cards to transition kitchen status in real-time</p>
+    </div>
+    <div class="d-flex gap-2">
+      <a href="{{ url_for('vendor.batches') }}" class="btn btn-outline-primary fw-bold"><i class="fa-solid fa-layer-group me-1"></i> View Smart Batches</a>
+      <button onclick="window.location.reload()" class="btn btn-secondary"><i class="fa-solid fa-rotate-right me-1"></i> Refresh Board</button>
+    </div>
+  </div>
+
+  <!-- Kanban Columns Board -->
+  <div class="kanban-board">
+    <!-- 1. NEW / PLACED -->
+    <div class="kanban-col">
+      <div class="kanban-header text-primary"><i class="fa-solid fa-circle me-1"></i> NEW ORDERS ({{ kanban['PLACED'] | length }})</div>
+      {% for order in kanban['PLACED'] %}
+        <div class="kanban-card border-start border-primary border-4">
+          <div class="d-flex justify-content-between">
+            <strong>#{{ order.order_number }}</strong>
+            <span class="badge bg-primary">₹{{ "%.0f"|format(order.total) }}</span>
+          </div>
+          <small class="text-muted d-block my-1"><i class="fa-solid fa-user me-1"></i> {{ order.user.name }}</small>
+          <div class="small bg-light p-2 rounded mb-2">
+            {% for item in order.items %}
+              <div>• {{ item.menu_item.name }} × {{ item.quantity }}</div>
+            {% endfor %}
+          </div>
+          <small class="text-muted d-block mb-2"><i class="fa-solid fa-clock me-1"></i> {{ order.pickup_time }}</small>
+          <button onclick="updateOrderStatus({{ order.id }}, 'PREPARING')" class="btn btn-sm btn-primary w-100 fw-bold">
+            Start Preparing →
+          </button>
+        </div>
+      {% endfor %}
+    </div>
+
+    <!-- 2. PREPARING -->
+    <div class="kanban-col">
+      <div class="kanban-header text-warning"><i class="fa-solid fa-fire me-1"></i> PREPARING ({{ kanban['PREPARING'] | length }})</div>
+      {% for order in kanban['PREPARING'] %}
+        <div class="kanban-card border-start border-warning border-4">
+          <div class="d-flex justify-content-between">
+            <strong>#{{ order.order_number }}</strong>
+            <span class="badge bg-warning text-dark">₹{{ "%.0f"|format(order.total) }}</span>
+          </div>
+          <small class="text-muted d-block my-1"><i class="fa-solid fa-user me-1"></i> {{ order.user.name }}</small>
+          <div class="small bg-light p-2 rounded mb-2">
+            {% for item in order.items %}
+              <div>• {{ item.menu_item.name }} × {{ item.quantity }}</div>
+            {% endfor %}
+          </div>
+          <small class="text-muted d-block mb-2"><i class="fa-solid fa-clock me-1"></i> {{ order.pickup_time }}</small>
+          <button onclick="updateOrderStatus({{ order.id }}, 'ALMOST_READY')" class="btn btn-sm btn-warning w-100 fw-bold">
+            Almost Ready →
+          </button>
+        </div>
+      {% endfor %}
+    </div>
+
+    <!-- 3. ALMOST READY -->
+    <div class="kanban-col">
+      <div class="kanban-header text-info"><i class="fa-solid fa-hourglass-half me-1"></i> ALMOST READY ({{ kanban['ALMOST_READY'] | length }})</div>
+      {% for order in kanban['ALMOST_READY'] %}
+        <div class="kanban-card border-start border-info border-4">
+          <div class="d-flex justify-content-between">
+            <strong>#{{ order.order_number }}</strong>
+            <span class="badge bg-info">₹{{ "%.0f"|format(order.total) }}</span>
+          </div>
+          <small class="text-muted d-block my-1"><i class="fa-solid fa-user me-1"></i> {{ order.user.name }}</small>
+          <div class="small bg-light p-2 rounded mb-2">
+            {% for item in order.items %}
+              <div>• {{ item.menu_item.name }} × {{ item.quantity }}</div>
+            {% endfor %}
+          </div>
+          <button onclick="updateOrderStatus({{ order.id }}, 'READY')" class="btn btn-sm btn-info text-white w-100 fw-bold">
+            Mark Ready →
+          </button>
+        </div>
+      {% endfor %}
+    </div>
+
+    <!-- 4. READY -->
+    <div class="kanban-col">
+      <div class="kanban-header text-success"><i class="fa-solid fa-check-circle me-1"></i> READY FOR PICKUP ({{ kanban['READY'] | length }})</div>
+      {% for order in kanban['READY'] %}
+        <div class="kanban-card border-start border-success border-4">
+          <div class="d-flex justify-content-between">
+            <strong>#{{ order.order_number }}</strong>
+            <span class="badge bg-success">₹{{ "%.0f"|format(order.total) }}</span>
+          </div>
+          <small class="text-muted d-block my-1"><i class="fa-solid fa-user me-1"></i> {{ order.user.name }}</small>
+          <div class="small bg-light p-2 rounded mb-2">
+            {% for item in order.items %}
+              <div>• {{ item.menu_item.name }} × {{ item.quantity }}</div>
+            {% endfor %}
+          </div>
+          <button onclick="updateOrderStatus({{ order.id }}, 'PICKED_UP')" class="btn btn-sm btn-success w-100 fw-bold">
+            Complete & Hand Over ✓
+          </button>
+        </div>
+      {% endfor %}
+    </div>
+
+    <!-- 5. COMPLETED -->
+    <div class="kanban-col">
+      <div class="kanban-header text-secondary"><i class="fa-solid fa-flag-checkered me-1"></i> COMPLETED ({{ kanban['COMPLETED'] | length }})</div>
+      {% for order in kanban['COMPLETED'][:5] %}
+        <div class="kanban-card border-start border-secondary border-4 opacity-75">
+          <div class="d-flex justify-content-between">
+            <strong>#{{ order.order_number }}</strong>
+            <span class="badge bg-secondary">Picked Up</span>
+          </div>
+          <small class="text-muted d-block my-1">{{ order.user.name }}</small>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+{% endblock %}

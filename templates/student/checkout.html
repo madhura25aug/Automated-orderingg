@@ -1,0 +1,185 @@
+{% extends "base.html" %}
+
+{% block title %}Checkout & QueueZero Schedule - CanteenFlow AI{% endblock %}
+
+{% block content %}
+<div class="container py-3">
+  <h2 class="fw-bold mb-4"><i class="fa-solid fa-bolt text-warning me-2"></i> QueueZero Checkout</h2>
+
+  <div class="row g-4">
+    <!-- QueueZero Timeline & Smart Schedule -->
+    <div class="col-md-7">
+      <div class="card-custom p-4 mb-4">
+        <h5 class="fw-bold mb-3"><i class="fa-solid fa-route text-primary me-2"></i> QueueZero Smart Pickup Schedule</h5>
+        <p class="text-muted small">You don't need to stand in line. Our AI schedules your departure so food is hot right when you arrive.</p>
+
+        <!-- Timeline Visual -->
+        <div class="timeline-horizontal my-4">
+          <div class="timeline-step active">
+            <div class="timeline-icon"><i class="fa-solid fa-school"></i></div>
+            <span class="fw-bold small d-block">Classroom</span>
+            <small class="text-muted">Leave at {{ scheduler.leave_classroom_time }}</small>
+          </div>
+          <div class="timeline-step active">
+            <div class="timeline-icon"><i class="fa-solid fa-person-walking"></i></div>
+            <span class="fw-bold small d-block">Walk</span>
+            <small class="text-muted">{{ scheduler.walking_time_mins }} mins</small>
+          </div>
+          <div class="timeline-step active">
+            <div class="timeline-icon"><i class="fa-solid fa-store"></i></div>
+            <span class="fw-bold small d-block">Canteen</span>
+            <small class="text-muted">{{ vendor.name }}</small>
+          </div>
+          <div class="timeline-step active">
+            <div class="timeline-icon"><i class="fa-solid fa-burger"></i></div>
+            <span class="fw-bold small d-block">{{ scheduler.pickup_counter }}</span>
+            <small class="text-muted">Ready {{ scheduler.estimated_ready_time }}</small>
+          </div>
+        </div>
+
+        <div class="p-3 bg-light rounded border text-center">
+          <span class="badge bg-success mb-1">QueueZero AI Recommendation</span>
+          <h5 class="fw-bold text-dark mb-1">Leave classroom at <strong>{{ scheduler.leave_classroom_time }}</strong></h5>
+          <p class="mb-0 text-muted">Food estimated ready at <strong>{{ scheduler.estimated_ready_time }}</strong> at <strong>{{ scheduler.pickup_counter }}</strong>.</p>
+        </div>
+      </div>
+
+      <!-- Payment Method Selection -->
+      <div class="card-custom p-4">
+        <h5 class="fw-bold mb-3"><i class="fa-solid fa-credit-card me-2"></i> Select Payment Method (Simulated)</h5>
+        <div class="mb-3">
+          <select id="payment-method" class="form-select form-select-lg">
+            <option value="UPI">📱 Campus UPI / GPay / PhonePe</option>
+            <option value="Card">💳 Debit / Credit Card</option>
+            <option value="Wallet">👛 Student Canteen Wallet</option>
+          </select>
+        </div>
+        <div class="p-2 bg-info bg-opacity-10 text-info rounded small">
+          <i class="fa-solid fa-circle-info me-1"></i> Demo environment: Payment is instantly simulated upon clicking pay.
+        </div>
+      </div>
+    </div>
+
+    <!-- Order Items & Final Action -->
+    <div class="col-md-5">
+      <div class="card-custom p-4 sticky-top" style="top: 80px;">
+        <h5 class="fw-bold mb-3">Order Items</h5>
+        <ul class="list-group list-group-flush mb-3">
+          {% for row in cart_items %}
+            <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+              <div>
+                <strong class="d-block">{{ row.item.name }} × {{ row.quantity }}</strong>
+                <small class="text-muted">Prep time: {{ row.item.prep_time }} mins</small>
+              </div>
+              <span class="fw-bold">₹{{ "%.0f"|format(row.subtotal) }}</span>
+            </li>
+          {% endfor %}
+        </ul>
+
+        <div class="d-flex justify-content-between mb-3 border-top pt-2">
+          <span class="fs-5 fw-bold">Total</span>
+          <span class="fs-4 fw-bold text-primary">₹{{ "%.0f"|format(total) }}</span>
+        </div>
+
+        <button onclick="openPaymentModal({{ vendor.id }}, '{{ scheduler.pickup_slot_str }}', {{ total }})" class="btn btn-primary btn-lg w-100 fw-bold py-3">
+          <i class="fa-solid fa-lock me-2"></i> Proceed to Pay ₹{{ "%.0f"|format(total) }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Fake Payment Gateway Modal -->
+<div class="modal fade" id="paymentModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 shadow-lg">
+      <div class="modal-header bg-dark text-white">
+        <h5 class="modal-header-title fw-bold mb-0">
+          <i class="fa-solid fa-shield-halved text-success me-2"></i> Campus Pay Gateway (Simulated)
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body p-4" id="payment-modal-body">
+        <div class="text-center mb-4">
+          <span class="text-muted small">Paying {{ vendor.name }}</span>
+          <h2 class="fw-bold text-primary mb-0">₹<span id="modal-pay-amount">0</span></h2>
+        </div>
+
+        <div id="payment-selection-step">
+          <div class="mb-3">
+            <label class="form-label fw-bold">Select Payment Option</label>
+            <div class="list-group">
+              <label class="list-group-item d-flex align-items-center gap-3">
+                <input class="form-check-input flex-shrink-0" type="radio" name="payMethod" value="UPI" checked onclick="togglePayOption('UPI')">
+                <div>
+                  <strong class="d-block">📱 UPI / QR Code (GPay / PhonePe / Paytm)</strong>
+                  <small class="text-muted">Instant payment via campus UPI ID</small>
+                </div>
+              </label>
+              <label class="list-group-item d-flex align-items-center gap-3">
+                <input class="form-check-input flex-shrink-0" type="radio" name="payMethod" value="Card" onclick="togglePayOption('Card')">
+                <div>
+                  <strong class="d-block">💳 Debit / Credit Card</strong>
+                  <small class="text-muted">Visa, Mastercard, RuPay</small>
+                </div>
+              </label>
+              <label class="list-group-item d-flex align-items-center gap-3">
+                <input class="form-check-input flex-shrink-0" type="radio" name="payMethod" value="Wallet" onclick="togglePayOption('Wallet')">
+                <div>
+                  <strong class="d-block">👛 Student Canteen Wallet</strong>
+                  <small class="text-success fw-bold">Balance Available: ₹500.00</small>
+                </div>
+              </label>
+            </div>
+          </div>
+
+          <!-- Dynamic UPI Option -->
+          <div id="pay-opt-upi" class="p-3 bg-light rounded text-center mb-3">
+            <div class="bg-white p-3 rounded border d-inline-block mb-2 shadow-sm">
+              <i class="fa-solid fa-qrcode fs-1 text-dark"></i>
+            </div>
+            <div class="small text-muted mb-2">Scan QR Code or enter Campus VPA: <code>canteen@campus.upi</code></div>
+            <input type="text" class="form-control form-control-sm text-center" value="student@okicici" readonly>
+          </div>
+
+          <!-- Dynamic Card Option -->
+          <div id="pay-opt-card" class="p-3 bg-light rounded mb-3 d-none">
+            <input type="text" class="form-control mb-2" placeholder="4532 •••• •••• 8821" value="4532 9812 3456 8821" readonly>
+            <div class="row g-2">
+              <div class="col-6"><input type="text" class="form-control" value="08/28" readonly></div>
+              <div class="col-6"><input type="text" class="form-control" value="782" readonly></div>
+            </div>
+          </div>
+
+          <button onclick="confirmFakePayment()" class="btn btn-success btn-lg w-100 fw-bold py-3 mt-2">
+            <i class="fa-solid fa-check me-2"></i> Confirm & Pay Now
+          </button>
+        </div>
+
+        <!-- Payment Processing Step -->
+        <div id="payment-processing-step" class="text-center py-5 d-none">
+          <div class="spinner-border text-primary mb-3" style="width: 3rem; height: 3rem;" role="status"></div>
+          <h5 class="fw-bold text-dark mb-1">Processing Payment...</h5>
+          <p class="text-muted small">Verifying transaction with Campus Payment Server</p>
+        </div>
+
+        <!-- Payment Success & Pickup Token Step -->
+        <div id="payment-success-step" class="text-center py-4 d-none">
+          <div class="fs-1 text-success mb-2"><i class="fa-solid fa-circle-check"></i></div>
+          <h4 class="fw-bold text-success mb-1">Payment Successful ✓</h4>
+          <p class="text-muted small mb-3">Transaction ID: TXN-{{ random_num if random_num else '84920' }}</p>
+
+          <div class="card-custom p-4 bg-dark text-white border-warning mb-3">
+            <span class="text-warning small uppercase fw-bold d-block mb-1">FAST COUNTER PICKUP TOKEN</span>
+            <h1 class="display-4 fw-bold text-warning mb-1" id="token-badge-display">#TK-8492</h1>
+            <div class="small text-light mb-2"><i class="fa-solid fa-barcode me-1"></i> Present this Token Code at {{ scheduler.pickup_counter }}</div>
+            <span class="badge bg-success">Estimated Ready: {{ scheduler.estimated_ready_time }}</span>
+          </div>
+
+          <p class="small text-muted mb-0">Redirecting to Order Tracking Timeline...</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

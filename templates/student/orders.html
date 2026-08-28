@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+
+{% block title %}My Orders - CanteenFlow AI{% endblock %}
+
+{% block content %}
+<div class="container py-3">
+  <h2 class="fw-bold mb-4"><i class="fa-solid fa-receipt text-primary me-2"></i> My Order History</h2>
+
+  {% if not orders %}
+    <div class="card-custom p-5 text-center">
+      <h4 class="text-muted fw-bold">No orders placed yet</h4>
+      <p class="text-secondary">Order your favorite campus meals with QueueZero pickup scheduling.</p>
+      <a href="{{ url_for('student.vendors') }}" class="btn btn-primary fw-bold">Browse Canteens</a>
+    </div>
+  {% else %}
+    <div class="row g-3">
+      {% for order in orders %}
+        <div class="col-md-12">
+          <div class="card-custom p-4">
+            <div class="d-flex justify-content-between align-items-start mb-3">
+              <div>
+                <h5 class="fw-bold mb-1">Order #{{ order.order_number }}</h5>
+                <span class="text-muted small"><i class="fa-solid fa-store me-1"></i> {{ order.vendor.name }} — {{ order.created_at.strftime('%Y-%m-%d %H:%M') }}</span>
+              </div>
+              <div class="text-end">
+                <span class="badge bg-{{ 'success' if order.status in ['READY', 'PICKED_UP'] else ('warning' if order.status in ['PLACED', 'CONFIRMED', 'PREPARING'] else 'secondary') }} fs-6 px-3 py-2 d-block mb-1">
+                  {{ order.status.replace('_', ' ') }}
+                </span>
+                <span class="badge bg-dark text-warning border border-warning small">
+                  <i class="fa-solid fa-qrcode me-1"></i> TOKEN: #{{ order.pickup_token or 'TK-8492' }}
+                </span>
+              </div>
+            </div>
+
+            <div class="row bg-light p-3 rounded mb-3">
+              <div class="col-md-8">
+                <strong class="d-block text-muted small mb-1">ITEMS ORDERED:</strong>
+                <ul class="list-inline mb-0">
+                  {% for item in order.items %}
+                    <li class="list-inline-item me-3"><strong>{{ item.menu_item.name }}</strong> × {{ item.quantity }}</li>
+                  {% endfor %}
+                </ul>
+              </div>
+              <div class="col-md-4 text-end">
+                <span class="text-muted small d-block">Pickup Counter & Time:</span>
+                <strong class="text-primary">{{ order.pickup_counter }} @ {{ order.pickup_time }}</strong>
+              </div>
+            </div>
+
+            <div class="d-flex justify-content-between align-items-center">
+              <span class="fs-5 fw-bold">Total: ₹{{ "%.0f"|format(order.total) }}</span>
+
+              <div class="d-flex gap-2">
+                {% if order.status in ['PLACED', 'CONFIRMED', 'PREPARING', 'ALMOST_READY', 'READY'] %}
+                  <a href="{{ url_for('student.tracking', order_id=order.id) }}" class="btn btn-sm btn-primary fw-bold">
+                    <i class="fa-solid fa-location-crosshairs me-1"></i> Track Live
+                  </a>
+                  <button onclick="offerSmartSwap({{ order.id }})" class="btn btn-sm btn-outline-warning fw-bold">
+                    <i class="fa-solid fa-rotate me-1"></i> Offer on SmartSwap
+                  </button>
+                  <button onclick="donateOrder({{ order.id }})" class="btn btn-sm btn-outline-success fw-bold">
+                    <i class="fa-solid fa-hand-holding-heart me-1"></i> Donate Order
+                  </button>
+                {% else %}
+                  <span class="text-muted small">Completed / Swapped</span>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

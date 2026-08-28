@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block title %}Register - CanteenFlow AI{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-md-5">
+      <div class="card-custom p-4 shadow">
+        <h3 class="fw-bold text-center mb-1">Create Account 🚀</h3>
+        <p class="text-muted text-center mb-4">Join CanteenFlow AI</p>
+
+        <form method="POST" action="{{ url_for('auth.register') }}">
+          <div class="mb-3">
+            <label class="form-label">Full Name</label>
+            <input type="text" name="name" class="form-control" placeholder="Alex Rivers" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Email Address</label>
+            <input type="email" name="email" class="form-control" placeholder="alex@campus.edu" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Role</label>
+            <select name="role" class="form-select">
+              <option value="student">Student</option>
+              <option value="vendor">Vendor</option>
+              <option value="admin">Campus Admin</option>
+            </select>
+          </div>
+          <div class="mb-4">
+            <label class="form-label">Password</label>
+            <input type="password" name="password" class="form-control" placeholder="••••••••" required>
+          </div>
+          <button type="submit" class="btn btn-primary btn-lg w-100 fw-bold">Register</button>
+        </form>
+
+        <div class="mt-3 text-center small">
+          Already registered? <a href="{{ url_for('auth.login') }}">Log in here</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

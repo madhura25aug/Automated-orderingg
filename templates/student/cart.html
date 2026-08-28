@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+
+{% block title %}Smart Cart - CanteenFlow AI{% endblock %}
+
+{% block content %}
+<div class="container py-3">
+  <h2 class="fw-bold mb-4"><i class="fa-solid fa-cart-shopping text-primary me-2"></i> Smart Cart</h2>
+
+  {% if not cart_items %}
+    <div class="card-custom p-5 text-center">
+      <div class="fs-1 text-muted mb-3"><i class="fa-solid fa-basket-shopping"></i></div>
+      <h4 class="fw-bold text-muted">Your cart is currently empty</h4>
+      <p class="text-secondary mb-4">Browse campus canteens to add delicious meals.</p>
+      <div>
+        <a href="{{ url_for('student.vendors') }}" class="btn btn-primary btn-lg fw-bold">Browse Canteens</a>
+      </div>
+    </div>
+  {% else %}
+    <div class="row g-4">
+      <!-- Items List -->
+      <div class="col-md-8">
+        <div class="card-custom p-4 mb-4">
+          <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom">
+            <h5 class="fw-bold mb-0">Vendor: {{ vendor.name }}</h5>
+            <span class="badge bg-secondary">Total Prep Time: ~{{ scheduler.prep_time_mins }} mins</span>
+          </div>
+
+          {% for cart_row in cart_items %}
+            {% set item = cart_row.item %}
+            <div class="d-flex justify-content-between align-items-center py-3 border-bottom" data-cart-item-id="{{ item.id }}" data-cart-item-qty="{{ cart_row.quantity }}">
+              <div>
+                <h6 class="fw-bold mb-1">{{ item.name }}</h6>
+                <small class="text-muted">₹{{ "%.0f"|format(item.price) }} each</small>
+              </div>
+
+              <div class="d-flex align-items-center gap-3">
+                <div class="input-group input-group-sm" style="width: 110px;">
+                  <button onclick="updateCartQty({{ item.id }}, {{ cart_row.quantity - 1 }})" class="btn btn-outline-secondary">-</button>
+                  <span class="form-control text-center font-weight-bold">{{ cart_row.quantity }}</span>
+                  <button onclick="updateCartQty({{ item.id }}, {{ cart_row.quantity + 1 }})" class="btn btn-outline-secondary">+</button>
+                </div>
+                <span class="fs-5 fw-bold text-primary min-w-80 text-end">₹{{ "%.0f"|format(cart_row.subtotal) }}</span>
+              </div>
+            </div>
+          {% endfor %}
+
+          <div class="d-flex justify-content-between align-items-center pt-3">
+            <span class="fs-5 text-muted">Subtotal</span>
+            <span class="fs-3 fw-bold text-dark">₹{{ "%.0f"|format(total) }}</span>
+          </div>
+        </div>
+
+        <!-- QueueZero AI Recommendation Alert Box -->
+        {% if ai_rec.has_recommendation %}
+          <div class="card-custom p-4 bg-primary bg-opacity-10 border-primary">
+            <div class="d-flex align-items-start gap-3">
+              <div class="fs-2 text-primary"><i class="fa-solid fa-robot"></i></div>
+              <div>
+                <h5 class="fw-bold text-primary mb-1">🤖 AI PICKUP RECOMMENDATION</h5>
+                <p class="mb-3 text-dark fs-6">{{ ai_rec.message }}</p>
+                <div class="d-flex gap-2">
+                  <a href="{{ url_for('student.checkout', pickup_time=ai_rec.recommended_time) }}" class="btn btn-primary fw-bold">
+                    [Accept Recommendation: {{ ai_rec.recommended_time }}]
+                  </a>
+                  <a href="{{ url_for('student.checkout', pickup_time=ai_rec.current_time) }}" class="btn btn-outline-secondary fw-bold">
+                    [Keep My Time: {{ ai_rec.current_time }}]
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        {% endif %}
+      </div>
+
+      <!-- Order Summary Card -->
+      <div class="col-md-4">
+        <div class="card-custom p-4 sticky-top" style="top: 80px;">
+          <h5 class="fw-bold mb-3">Order Summary</h5>
+          <div class="d-flex justify-content-between mb-2">
+            <span class="text-muted">Food Total</span>
+            <span class="fw-bold">₹{{ "%.0f"|format(total) }}</span>
+          </div>
+          <div class="d-flex justify-content-between mb-2">
+            <span class="text-muted">QueueZero Service Fee</span>
+            <span class="text-success fw-bold">FREE 🌱</span>
+          </div>
+          <hr>
+          <div class="d-flex justify-content-between mb-4">
+            <span class="fs-5 fw-bold">Total Amount</span>
+            <span class="fs-4 fw-bold text-primary">₹{{ "%.0f"|format(total) }}</span>
+          </div>
+
+          <a href="{{ url_for('student.checkout') }}" class="btn btn-success btn-lg w-100 fw-bold">
+            Proceed to Checkout →
+          </a>
+        </div>
+      </div>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

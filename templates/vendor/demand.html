@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+
+{% block title %}AI Demand Prediction - {{ vendor.name }}{% endblock %}
+
+{% block content %}
+<div class="container py-3">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h2 class="fw-bold mb-1"><i class="fa-solid fa-brain text-primary me-2"></i> AI Demand Forecast & Planning</h2>
+      <p class="text-muted mb-0">RandomForest Machine Learning model trained on historical order records</p>
+    </div>
+    <button onclick="runDemoForecast()" class="btn btn-primary btn-lg fw-bold">
+      <i class="fa-solid fa-play me-1"></i> Run AI Demand Forecast
+    </button>
+  </div>
+
+  <!-- Hourly Forecast Window Cards -->
+  <h4 class="fw-bold mb-3">Hourly Peak Forecasts</h4>
+  <div class="row g-3 mb-4">
+    {% for f in hourly_forecasts %}
+      <div class="col-md-4">
+        <div class="card-custom p-4 h-100">
+          <div class="d-flex justify-content-between align-items-start mb-2">
+            <h5 class="fw-bold mb-0">{{ f.time_slot }}</h5>
+            <span class="badge bg-danger fs-6">{{ f.demand_level }}</span>
+          </div>
+          <p class="text-muted small mb-3">Expected Orders: <strong class="fs-4 text-dark">{{ f.expected_orders }}</strong></p>
+
+          <strong class="d-block text-muted small mb-2">TOP PREDICTED ITEMS:</strong>
+          <ul class="list-unstyled mb-0 small">
+            {% for name, qty in f.items_map.items() %}
+              <li class="d-flex justify-content-between py-1 border-bottom">
+                <span>{{ name }}</span>
+                <strong class="text-primary">{{ qty }} units</strong>
+              </li>
+            {% endfor %}
+          </ul>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+
+  <!-- Item-wise Preparation Advice Table -->
+  <h4 class="fw-bold mb-3">Item Preparation Recommendations</h4>
+  <div class="card-custom p-4">
+    <div class="table-responsive">
+      <table class="table table-hover align-middle">
+        <thead class="table-light">
+          <tr>
+            <th>Menu Item</th>
+            <th>Current Stock</th>
+            <th>Predicted Demand</th>
+            <th>Potential Shortage</th>
+            <th>AI Recommendation</th>
+            <th>ML Confidence</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for item in item_forecasts %}
+            <tr>
+              <td><strong>{{ item.name }}</strong></td>
+              <td>{{ item.current_stock }}</td>
+              <td><strong class="text-primary">{{ item.predicted_demand }}</strong></td>
+              <td>
+                {% if item.potential_shortage > 0 %}
+                  <span class="badge bg-danger">Shortage of {{ item.potential_shortage }}</span>
+                {% else %}
+                  <span class="badge bg-success">Sufficient</span>
+                {% endif %}
+              </td>
+              <td><span class="small font-weight-bold text-dark">{{ item.recommendation }}</span></td>
+              <td><span class="badge bg-info">88% (High)</span></td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

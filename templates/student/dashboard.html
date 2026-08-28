@@ -1,0 +1,131 @@
+{% extends "base.html" %}
+
+{% block title %}Student Dashboard - CanteenFlow AI{% endblock %}
+
+{% block content %}
+<div class="container py-3">
+  <!-- Greeting Header -->
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h2 class="fw-bold mb-1">Good Afternoon 👋, {{ user.name }}</h2>
+      <p class="text-muted mb-0">Campus Canteen Status & Smart Queue Management</p>
+    </div>
+    <div class="card-custom px-3 py-2 bg-success bg-opacity-10 text-success fw-bold">
+      <i class="fa-solid fa-leaf me-1"></i> {{ user.eco_points }} Eco Points
+    </div>
+  </div>
+
+  <!-- Key Metrics Cards Grid -->
+  <div class="row g-3 mb-4">
+    <!-- Canteen Crowd -->
+    <div class="col-md-3">
+      <div class="card-custom p-3">
+        <span class="text-muted small fw-bold uppercase">Canteen Crowd</span>
+        <div class="d-flex align-items-center justify-content-between mt-2">
+          <span class="fs-4 fw-bold text-dark">{{ crowd_data.current_vendor_crowd.level }}</span>
+        </div>
+        <small class="text-muted">Estimated wait: <strong>{{ crowd_data.current_vendor_crowd.wait_mins }} minutes</strong></small>
+      </div>
+    </div>
+
+    <!-- Active Order -->
+    <div class="col-md-3">
+      <div class="card-custom p-3">
+        <span class="text-muted small fw-bold uppercase">Active Order</span>
+        {% if active_order %}
+          <div class="mt-2">
+            <h6 class="fw-bold mb-0">#{{ active_order.order_number }}</h6>
+            <span class="badge bg-primary mt-1">{{ active_order.status.replace('_', ' ') }}</span>
+          </div>
+          <a href="{{ url_for('student.tracking', order_id=active_order.id) }}" class="small text-decoration-none mt-1 d-block fw-bold">Track Live →</a>
+        {% else %}
+          <div class="mt-2 text-muted small">No active orders right now.</div>
+          <a href="{{ url_for('student.vendors') }}" class="small text-decoration-none mt-1 d-block fw-bold">Order Food →</a>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Queue Time -->
+    <div class="col-md-3">
+      <div class="card-custom p-3">
+        <span class="text-muted small fw-bold uppercase">QueueZero Saved</span>
+        <div class="fs-3 fw-bold text-primary mt-1">18 Mins</div>
+        <small class="text-muted">Time saved this week</small>
+      </div>
+    </div>
+
+    <!-- Eco Points -->
+    <div class="col-md-3">
+      <div class="card-custom p-3">
+        <span class="text-muted small fw-bold uppercase">Today's Special</span>
+        <div class="fs-5 fw-bold text-dark mt-1">Masala Dosa</div>
+        <small class="text-muted">⭐ 4.9 Popularity Score</small>
+      </div>
+    </div>
+  </div>
+
+  <!-- AI Recommended Vendor Alert -->
+  {% if crowd_data.ai_recommendation %}
+    <div class="card-custom p-3 mb-4 bg-primary bg-opacity-10 border-primary">
+      <div class="d-flex align-items-center justify-content-between">
+        <div class="d-flex align-items-center gap-3">
+          <div class="fs-2 text-primary"><i class="fa-solid fa-robot"></i></div>
+          <div>
+            <h6 class="fw-bold mb-0 text-primary">AI Vendor Recommendation</h6>
+            <p class="mb-0 small text-dark">{{ crowd_data.ai_recommendation.message }}</p>
+          </div>
+        </div>
+        <a href="{{ url_for('student.menu', vendor_id=crowd_data.ai_recommendation.vendor_id) }}" class="btn btn-sm btn-primary fw-bold">Switch Vendor</a>
+      </div>
+    </div>
+  {% endif %}
+
+  <!-- Popular Right Now Section -->
+  <h4 class="fw-bold mb-3"><i class="fa-solid fa-fire text-danger me-2"></i> Popular Right Now</h4>
+  <div class="row g-3 mb-4">
+    {% for item in popular_items %}
+      <div class="col-md-3">
+        <div class="card-custom p-3 h-100 d-flex flex-column justify-content-between">
+          <div>
+            <div class="d-flex justify-content-between align-items-start mb-2">
+              <h6 class="fw-bold mb-0">{{ item.name }}</h6>
+              <span class="badge bg-warning text-dark"><i class="fa-solid fa-star"></i> {{ item.popularity_score }}</span>
+            </div>
+            <p class="small text-muted mb-2">{{ item.description }}</p>
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <span class="fs-5 fw-bold text-primary">₹{{ "%.0f"|format(item.price) }}</span>
+              <span class="small text-muted"><i class="fa-solid fa-clock me-1"></i> {{ item.prep_time }} min</span>
+            </div>
+          </div>
+          <button onclick="addToCart({{ item.id }})" class="btn btn-sm btn-outline-primary w-100 fw-bold">
+            <i class="fa-solid fa-plus me-1"></i> ADD TO CART
+          </button>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+
+  <!-- Campus Canteen Outlets Grid -->
+  <h4 class="fw-bold mb-3"><i class="fa-solid fa-store me-2"></i> Campus Canteens</h4>
+  <div class="row g-3">
+    {% for v in vendors %}
+      <div class="col-md-6">
+        <div class="card-custom p-3">
+          <div class="d-flex justify-content-between align-items-start">
+            <div>
+              <h5 class="fw-bold mb-1">{{ v.name }}</h5>
+              <p class="text-muted small mb-2"><i class="fa-solid fa-location-dot text-danger me-1"></i> {{ v.location }}</p>
+            </div>
+            <span class="badge bg-success">Wait: {{ v.average_prep_time }} min</span>
+          </div>
+          <p class="small text-muted">{{ v.description }}</p>
+          <div class="d-flex justify-content-between align-items-center pt-2 border-top">
+            <span class="small text-muted">Capacity: {{ v.current_capacity }} orders/hr</span>
+            <a href="{{ url_for('student.menu', vendor_id=v.id) }}" class="btn btn-sm btn-primary fw-bold">View Menu & Order</a>
+          </div>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

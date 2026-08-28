@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+
+{% block title %}Vendor Dashboard - {{ vendor.name }}{% endblock %}
+
+{% block content %}
+<div class="container py-3">
+  <!-- Vendor Header -->
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h2 class="fw-bold mb-1"><i class="fa-solid fa-chart-line text-primary me-2"></i> {{ vendor.name }} Dashboard</h2>
+      <p class="text-muted mb-0">Live Kitchen Operations & AI Demand Insights</p>
+    </div>
+    <div class="d-flex gap-2">
+      <a href="{{ url_for('vendor.live_orders') }}" class="btn btn-primary fw-bold"><i class="fa-solid fa-kanban me-1"></i> Live Order Board</a>
+      <a href="{{ url_for('vendor.copilot') }}" class="btn btn-warning text-dark fw-bold"><i class="fa-solid fa-robot me-1"></i> Canteen Copilot</a>
+    </div>
+  </div>
+
+  <!-- Metric Cards -->
+  <div class="row g-3 mb-4">
+    <div class="col-md-3">
+      <div class="card-custom p-3">
+        <span class="text-muted small fw-bold uppercase">Today's Orders</span>
+        <div class="fs-2 fw-bold text-dark mt-1">{{ today_count }}</div>
+        <small class="text-success fw-bold">↑ 14% vs yesterday</small>
+      </div>
+    </div>
+
+    <div class="col-md-3">
+      <div class="card-custom p-3">
+        <span class="text-muted small fw-bold uppercase">Active Kitchen Load</span>
+        <div class="fs-2 fw-bold text-primary mt-1">{{ active_count }}</div>
+        <small class="text-muted">In preparation queue</small>
+      </div>
+    </div>
+
+    <div class="col-md-3">
+      <div class="card-custom p-3">
+        <span class="text-muted small fw-bold uppercase">Today's Revenue</span>
+        <div class="fs-2 fw-bold text-success mt-1">₹{{ "%.0f"|format(revenue) }}</div>
+        <small class="text-muted">Simulated payments</small>
+      </div>
+    </div>
+
+    <div class="col-md-3">
+      <div class="card-custom p-3">
+        <span class="text-muted small fw-bold uppercase">Avg Prep Time</span>
+        <div class="fs-2 fw-bold text-info mt-1">{{ avg_prep }} Mins</div>
+        <small class="text-muted">Kitchen target: 8 min</small>
+      </div>
+    </div>
+  </div>
+
+  <!-- Chart & Insights Grid -->
+  <div class="row g-4 mb-4">
+    <div class="col-md-8">
+      <div class="card-custom p-4 h-100">
+        <h5 class="fw-bold mb-3">Orders by Hour & AI Forecast</h5>
+        <div style="height: 280px;">
+          <canvas id="chartOrdersByHour"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-4">
+      <div class="card-custom p-4 h-100 bg-light">
+        <h5 class="fw-bold mb-3"><i class="fa-solid fa-lightbulb text-warning me-2"></i> AI Actionable Insights</h5>
+        <div class="p-3 bg-white rounded border mb-3">
+          <strong class="text-primary d-block mb-1">🔥 Peak Rush Alert</strong>
+          <p class="small text-muted mb-0">High demand expected between 12:30 PM - 1:00 PM. Prepare 42 Masala Dosas ahead.</p>
+        </div>
+
+        <div class="p-3 bg-white rounded border">
+          <strong class="text-danger d-block mb-1">⚠️ Inventory Warning</strong>
+          <p class="small text-muted mb-0">Sandwich stock is running low (8 remaining, predicted demand 26).</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Recent Live Orders Table -->
+  <h4 class="fw-bold mb-3">Recent Orders</h4>
+  <div class="card-custom p-4">
+    <div class="table-responsive">
+      <table class="table table-hover align-middle">
+        <thead class="table-light">
+          <tr>
+            <th>Order #</th>
+            <th>Student</th>
+            <th>Total Amount</th>
+            <th>Pickup Time</th>
+            <th>Status</th>
+            <th>Quick Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for order in recent_orders %}
+            <tr>
+              <td><strong>#{{ order.order_number }}</strong></td>
+              <td>{{ order.user.name }}</td>
+              <td>₹{{ "%.0f"|format(order.total) }}</td>
+              <td>{{ order.pickup_time }}</td>
+              <td><span class="badge bg-primary">{{ order.status.replace('_', ' ') }}</span></td>
+              <td>
+                {% if order.status == 'PLACED' %}
+                  <button onclick="updateOrderStatus({{ order.id }}, 'PREPARING')" class="btn btn-sm btn-primary">Start Prep</button>
+                {% elif order.status == 'PREPARING' %}
+                  <button onclick="updateOrderStatus({{ order.id }}, 'READY')" class="btn btn-sm btn-success">Mark Ready</button>
+                {% else %}
+                  <span class="text-muted small">Done</span>
+                {% endif %}
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

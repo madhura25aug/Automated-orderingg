@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+
+{% block title %}CanteenFlow AI - Campus Canteen Intelligence{% endblock %}
+
+{% block content %}
+<div class="hero-gradient py-5 mb-5 rounded-3 shadow-lg mx-3">
+  <div class="container text-center py-4">
+    <span class="badge bg-primary bg-opacity-25 text-info px-3 py-2 rounded-pill fs-6 mb-3">
+      ⚡ Next-Gen Campus Dining Platform
+    </span>
+    <h1 class="display-3 fw-bold text-white mb-3">
+      Beat the Queue. Predict the Rush.<br>
+      <span class="gradient-text">Eat Smarter.</span>
+    </h1>
+    <p class="lead text-light max-w-75 mx-auto mb-4">
+      Traditional food ordering apps solve ordering. <br>
+      <strong>CanteenFlow AI solves the entire campus canteen flow.</strong>
+    </p>
+    <div class="d-flex justify-content-center gap-3">
+      <a href="{{ url_for('auth.demo_login', role='student') }}" class="btn btn-primary btn-lg px-4 fw-bold">
+        <i class="fa-solid fa-utensils me-2"></i> Student Portal
+      </a>
+      <a href="{{ url_for('auth.demo_login', role='vendor') }}" class="btn btn-outline-light btn-lg px-4 fw-bold">
+        <i class="fa-solid fa-store me-2"></i> Vendor Dashboard
+      </a>
+      <a href="{{ url_for('demo_page') }}" class="btn btn-warning btn-lg px-4 fw-bold">
+        <i class="fa-solid fa-bolt me-2"></i> Hackathon Demo
+      </a>
+    </div>
+  </div>
+</div>
+
+<div class="container">
+  <div class="row g-4 mb-5">
+    <div class="col-md-4">
+      <div class="card-custom p-4 h-100 text-center">
+        <div class="fs-1 text-primary mb-3"><i class="fa-solid fa-user-clock"></i></div>
+        <h4 class="fw-bold">For Students</h4>
+        <p class="text-muted">Order ahead, skip standing in lines with <strong>QueueZero</strong> smart departure recommendations, and swap orders seamlessly.</p>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card-custom p-4 h-100 text-center">
+        <div class="fs-1 text-warning mb-3"><i class="fa-solid fa-brain"></i></div>
+        <h4 class="fw-bold">For Vendors</h4>
+        <p class="text-muted">Predict peak hour demand using ML, batch identical kitchen items automatically, and chat with <strong>Canteen Copilot</strong>.</p>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card-custom p-4 h-100 text-center">
+        <div class="fs-1 text-success mb-3"><i class="fa-solid fa-leaf"></i></div>
+        <h4 class="fw-bold">For Campus Admins</h4>
+        <p class="text-muted">Eliminate canteen lunch congestion, monitor food waste metrics, and reward students with Eco Points.</p>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+
+{% block title %}Canteen Copilot - AI Vendor Assistant{% endblock %}
+
+{% block content %}
+<div class="container py-3">
+  <div class="card-custom p-4 mb-4 hero-gradient text-white">
+    <div class="d-flex justify-content-between align-items-center">
+      <div>
+        <h2 class="fw-bold mb-1"><i class="fa-solid fa-robot text-warning me-2"></i> Canteen Copilot AI Assistant</h2>
+        <p class="mb-0 text-light">Real-time intelligent kitchen manager powered by python analytics & ML demand models</p>
+      </div>
+      <span class="badge bg-warning text-dark fs-6 px-3 py-2">Copilot Active</span>
+    </div>
+  </div>
+
+  <div class="row g-4">
+    <!-- Suggested Action Chips Sidebar -->
+    <div class="col-md-4">
+      <div class="card-custom p-4 h-100">
+        <h5 class="fw-bold mb-3"><i class="fa-solid fa-lightbulb text-primary me-2"></i> Suggested Queries</h5>
+        <div class="d-flex flex-column gap-2">
+          <button onclick="sendCopilotQuery('What should I prepare now?')" class="btn btn-outline-primary text-start fw-bold">
+            🍳 What should I prepare now?
+          </button>
+          <button onclick="sendCopilotQuery('Which item may run out?')" class="btn btn-outline-danger text-start fw-bold">
+            ⚠️ Which item may run out?
+          </button>
+          <button onclick="sendCopilotQuery('What is today\'s busiest hour?')" class="btn btn-outline-warning text-dark text-start fw-bold">
+            🔥 What is today's busiest hour?
+          </button>
+          <button onclick="sendCopilotQuery('Which item is most popular?')" class="btn btn-outline-info text-start fw-bold">
+            ⭐ Which item is most popular?
+          </button>
+          <button onclick="sendCopilotQuery('How much food was wasted?')" class="btn btn-outline-success text-start fw-bold">
+            🌱 How much food was wasted?
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Chat Interactive Window -->
+    <div class="col-md-8">
+      <div class="card-custom p-4 h-100 d-flex flex-column justify-content-between">
+        <div id="copilot-chat-history" class="overflow-auto mb-3 pe-2" style="max-height: 420px; min-height: 320px;">
+          <!-- Welcome Message -->
+          <div class="d-flex justify-content-start mb-3">
+            <div class="bg-light border p-3 rounded-3 max-w-75">
+              <strong>🤖 Canteen Copilot:</strong><br>
+              Hello Manager! I have analyzed your live order queue and historical trends.<br>
+              • High demand expected between <strong>12:30 PM - 1:00 PM</strong>.<br>
+              • Recommendation: Prepare <strong>42 Masala Dosas</strong>.<br>
+              • Sandwich stock is low (8 remaining).
+            </div>
+          </div>
+        </div>
+
+        <div class="input-group input-group-lg">
+          <input type="text" id="copilot-input" class="form-control" placeholder="Ask Copilot e.g., What should I prepare now?" onkeypress="if(event.key==='Enter') sendCopilotQuery()">
+          <button onclick="sendCopilotQuery()" class="btn btn-primary fw-bold">
+            <i class="fa-solid fa-paper-plane me-1"></i> Ask AI
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

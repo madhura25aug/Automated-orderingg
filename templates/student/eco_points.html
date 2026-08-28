@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+
+{% block title %}Eco Points & Sustainability - CanteenFlow AI{% endblock %}
+
+{% block content %}
+<div class="container py-3">
+  <div class="card-custom p-4 mb-4 hero-gradient text-white">
+    <div class="d-flex justify-content-between align-items-center">
+      <div>
+        <h2 class="fw-bold mb-1"><i class="fa-solid fa-leaf text-success me-2"></i> Sustainability & Eco Points</h2>
+        <p class="mb-0 text-light">Earn eco rewards by choosing smart pickup slots, donating meals, and using SmartSwap</p>
+      </div>
+      <div class="bg-white bg-opacity-25 p-3 rounded text-center">
+        <span class="text-light small text-uppercase fw-bold d-block">YOUR BALANCE</span>
+        <span class="fs-1 fw-bold text-warning">🌱 {{ user.eco_points }}</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-4 mb-4">
+    <!-- Level Badges -->
+    <div class="col-md-4">
+      <div class="card-custom p-4 h-100 text-center">
+        <div class="fs-1 text-success mb-2"><i class="fa-solid fa-award"></i></div>
+        <h5 class="fw-bold">Sustainability Champion</h5>
+        <p class="text-muted small">Tier 2 Eco Savior • 240 / 500 Points to Tier 3</p>
+        <div class="progress" style="height: 10px;">
+          <div class="progress-bar bg-success" style="width: 48%;"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- How to Earn -->
+    <div class="col-md-8">
+      <div class="card-custom p-4 h-100">
+        <h5 class="fw-bold mb-3"><i class="fa-solid fa-star text-warning me-2"></i> How to Earn Eco Points</h5>
+        <div class="row g-3">
+          <div class="col-md-6">
+            <div class="p-3 bg-light rounded">
+              <strong class="text-primary d-block">+20 Points</strong>
+              <small class="text-muted">Donate an uncollected meal to Campus Food Bank</small>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="p-3 bg-light rounded">
+              <strong class="text-primary d-block">+15 Points</strong>
+              <small class="text-muted">Transfer your order via SmartSwap marketplace</small>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="p-3 bg-light rounded">
+              <strong class="text-primary d-block">+10 Points</strong>
+              <small class="text-muted">Select an AI-recommended low-demand pickup slot</small>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="p-3 bg-light rounded">
+              <strong class="text-primary d-block">+5 Points</strong>
+              <small class="text-muted">Opt for eco-friendly reusable container option</small>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Recent Activity Log Table -->
+  <h4 class="fw-bold mb-3">Recent Eco Points Activity</h4>
+  <div class="card-custom p-4">
+    {% if not transactions %}
+      <p class="text-muted mb-0">No transaction logs yet.</p>
+    {% else %}
+      <div class="table-responsive">
+        <table class="table table-hover align-middle">
+          <thead class="table-light">
+            <tr>
+              <th>Date & Time</th>
+              <th>Activity Description</th>
+              <th class="text-end">Points Earned</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for t in transactions %}
+              <tr>
+                <td>{{ t.created_at }}</td>
+                <td>{{ t.reason }}</td>
+                <td class="text-end font-weight-bold text-success">+{{ t.points }} 🌱</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

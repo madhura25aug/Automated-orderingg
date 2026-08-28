@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}CanteenFlow AI - Beat the Queue, Eat Smarter{% endblock %}</title>
+
+  <!-- Bootstrap 5 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  {% block extra_css %}{% endblock %}
+</head>
+<body class="d-flex flex-column min-vh-100">
+
+  <!-- Main Navigation Navbar -->
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top shadow-sm">
+    <div class="container">
+      <a class="navbar-brand d-flex align-items-center gap-2 fw-bold" href="{{ url_for('landing') }}">
+        <span class="fs-4">⚡</span>
+        <span class="text-white">CanteenFlow <span class="text-primary">AI</span></span>
+      </a>
+
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+          {% if session.get('user_role') == 'student' %}
+            <li class="nav-item"><a class="nav-link" href="{{ url_for('student.dashboard') }}"><i class="fa-solid fa-house me-1"></i> Dashboard</a></li>
+            <li class="nav-item"><a class="nav-link" href="{{ url_for('student.vendors') }}"><i class="fa-solid fa-store me-1"></i> Canteens</a></li>
+            <li class="nav-item"><a class="nav-link" href="{{ url_for('student.orders') }}"><i class="fa-solid fa-receipt me-1"></i> My Orders</a></li>
+            <li class="nav-item"><a class="nav-link" href="{{ url_for('student.smartswap') }}"><i class="fa-solid fa-rotate me-1"></i> SmartSwap</a></li>
+            <li class="nav-item"><a class="nav-link" href="{{ url_for('student.group_order') }}"><i class="fa-solid fa-users me-1"></i> Group Order</a></li>
+            <li class="nav-item"><a class="nav-link" href="{{ url_for('student.eco_points') }}"><i class="fa-solid fa-leaf text-success me-1"></i> Eco Points</a></li>
+          {% elif session.get('user_role') == 'vendor' %}
+            <li class="nav-item"><a class="nav-link" href="{{ url_for('vendor.dashboard') }}"><i class="fa-solid fa-chart-line me-1"></i> Overview</a></li>
+            <li class="nav-item"><a class="nav-link" href="{{ url_for('vendor.live_orders') }}"><i class="fa-solid fa-kanban me-1"></i> Live Board</a></li>
+            <li class="nav-item"><a class="nav-link" href="{{ url_for('vendor.batches') }}"><i class="fa-solid fa-layer-group me-1"></i> Smart Batches</a></li>
+            <li class="nav-item"><a class="nav-link" href="{{ url_for('vendor.demand') }}"><i class="fa-solid fa-brain me-1"></i> AI Forecast</a></li>
+            <li class="nav-item"><a class="nav-link" href="{{ url_for('vendor.inventory') }}"><i class="fa-solid fa-boxes-stacked me-1"></i> Inventory</a></li>
+            <li class="nav-item"><a class="nav-link" href="{{ url_for('vendor.waste') }}"><i class="fa-solid fa-recycle me-1"></i> Waste Analytics</a></li>
+            <li class="nav-item"><a class="nav-link" href="{{ url_for('vendor.copilot') }}"><i class="fa-solid fa-robot text-warning me-1"></i> Copilot</a></li>
+          {% elif session.get('user_role') == 'admin' %}
+            <li class="nav-item"><a class="nav-link" href="{{ url_for('admin.dashboard') }}"><i class="fa-solid fa-shield-halved me-1"></i> Campus Admin</a></li>
+          {% endif %}
+        </ul>
+
+        <div class="d-flex align-items-center gap-3">
+          <a href="{{ url_for('demo_page') }}" class="btn btn-sm btn-outline-warning fw-bold"><i class="fa-solid fa-bolt me-1"></i> Demo Mode</a>
+
+          {% if session.get('user_id') %}
+            {% if session.get('user_role') == 'student' %}
+              <a href="{{ url_for('student.cart') }}" class="btn btn-sm btn-outline-light position-relative">
+                <i class="fa-solid fa-cart-shopping"></i> Cart
+                <span id="cart-count-badge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                  {{ session.get('cart', {}).get('items', {}) | length }}
+                </span>
+              </a>
+            {% endif %}
+            <div class="dropdown">
+              <button class="btn btn-sm btn-primary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                <i class="fa-solid fa-user me-1"></i> {{ session.get('user_name', 'Account') }}
+              </button>
+              <ul class="dropdown-menu dropdown-menu-end shadow">
+                <li><span class="dropdown-item-text text-muted small">Role: {{ session.get('user_role', 'user') | upper }}</span></li>
+                <li><hr class="dropdown-divider"></li>
+                <li><a class="dropdown-item text-danger" href="{{ url_for('auth.logout') }}"><i class="fa-solid fa-right-from-bracket me-2"></i> Logout</a></li>
+              </ul>
+            </div>
+          {% else %}
+            <a href="{{ url_for('auth.login') }}" class="btn btn-sm btn-outline-light">Login</a>
+            <a href="{{ url_for('auth.register') }}" class="btn btn-sm btn-primary">Register</a>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Flash Messages Toast Container -->
+  <div id="toast-container" class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 1090;">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="toast show align-items-center text-white bg-{{ 'danger' if category == 'danger' else ('success' if category == 'success' else 'primary') }} border-0 mb-2" role="alert">
+            <div class="d-flex">
+              <div class="toast-body">{{ message }}</div>
+              <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+            </div>
+          </div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+  </div>
+
+  <!-- Page Main Content -->
+  <main class="flex-grow-1 py-4">
+    {% block content %}{% endblock %}
+  </main>
+
+  <!-- Footer -->
+  <footer class="bg-dark text-white py-3 mt-auto border-top border-secondary">
+    <div class="container text-center small text-muted">
+      <span>CanteenFlow AI &copy; 2026 — "Beat the Queue. Predict the Rush. Eat Smarter."</span>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.socket.io/4.6.0/socket.io.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/student.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/vendor.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/charts.js') }}"></script>
+  {% block extra_js %}{% endblock %}
+</body>
+</html>

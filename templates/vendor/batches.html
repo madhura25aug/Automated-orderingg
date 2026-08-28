@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+
+{% block title %}Smart Order Batches - CanteenFlow AI{% endblock %}
+
+{% block content %}
+<div class="container py-3">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h2 class="fw-bold mb-1"><i class="fa-solid fa-layer-group text-primary me-2"></i> Smart Kitchen Order Batching</h2>
+      <p class="text-muted mb-0">AI groups identical food items across multiple active orders to accelerate prep output</p>
+    </div>
+    <button onclick="createSmartBatches()" class="btn btn-primary fw-bold">
+      <i class="fa-solid fa-wand-magic-sparkles me-1"></i> Create Smart Batches
+    </button>
+  </div>
+
+  {% if not batches %}
+    <div class="card-custom p-5 text-center">
+      <h4 class="text-muted fw-bold">No active orders available for batching</h4>
+      <p class="text-secondary mb-3">Incoming orders will automatically group into Smart Batches.</p>
+      <button onclick="createSmartBatches()" class="btn btn-outline-primary fw-bold">Run Batching Engine Now</button>
+    </div>
+  {% else %}
+    <div class="row g-4">
+      {% for b in batches %}
+        <div class="col-md-6">
+          <div class="card-custom p-4">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <div>
+                <h4 class="fw-bold mb-0 text-primary">Batch #{{ b.batch_number }}</h4>
+                <small class="text-muted">{{ b.order_count }} Individual Student Orders Grouped</small>
+              </div>
+              <span class="badge bg-danger fs-6 px-3 py-2">{{ b.priority }}</span>
+            </div>
+
+            <div class="bg-light p-3 rounded mb-3">
+              <strong class="d-block text-muted small mb-2">KITCHEN PREP QUANTITIES:</strong>
+              {% for item_name, qty in b.items_map.items() %}
+                <div class="d-flex justify-content-between py-1 border-bottom border-secondary border-opacity-10">
+                  <span class="fw-bold text-dark fs-5">{{ item_name }}</span>
+                  <span class="fs-4 fw-bold text-primary">× {{ qty }}</span>
+                </div>
+              {% endfor %}
+            </div>
+
+            <div class="row g-2 text-center small mb-3">
+              <div class="col-6 bg-white p-2 border rounded">
+                <span class="text-muted">Estimated Prep Time</span><br>
+                <strong class="text-dark fs-6">{{ b.prep_time_mins }} Mins</strong>
+              </div>
+              <div class="col-6 bg-white p-2 border rounded">
+                <span class="text-muted">Target Pickup Deadline</span><br>
+                <strong class="text-danger fs-6">{{ b.pickup_deadline }}</strong>
+              </div>
+            </div>
+
+            <div class="d-flex justify-content-between align-items-center pt-2 border-top">
+              <small class="text-muted">Orders: {{ b.order_numbers | join(', ') }}</small>
+              <button onclick="startBatchCooking('{{ b.batch_number }}', {{ b.order_ids | tojson }})" class="btn btn-sm btn-primary fw-bold">
+                Start Cooking Batch
+              </button>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

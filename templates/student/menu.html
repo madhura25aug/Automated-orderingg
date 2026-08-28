@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+
+{% block title %}{{ vendor.name }} Menu - CanteenFlow AI{% endblock %}
+
+{% block content %}
+<div class="container py-3">
+  <!-- Vendor Header Banner -->
+  <div class="card-custom p-4 mb-4 hero-gradient text-white">
+    <div class="d-flex justify-content-between align-items-center">
+      <div>
+        <h2 class="fw-bold mb-1">{{ vendor.name }}</h2>
+        <p class="mb-0 text-light"><i class="fa-solid fa-location-dot me-1 text-warning"></i> {{ vendor.location }} — {{ vendor.description }}</p>
+      </div>
+      <span class="badge bg-success fs-6 px-3 py-2">Average Prep: {{ vendor.average_prep_time }} mins</span>
+    </div>
+  </div>
+
+  <!-- Filter & Search Controls -->
+  <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+    <div class="d-flex gap-2 flex-wrap">
+      <a href="{{ url_for('student.menu', vendor_id=vendor.id) }}" class="btn btn-sm {{ 'btn-primary' if not selected_category else 'btn-outline-secondary' }}">All</a>
+      {% for cat in categories %}
+        <a href="{{ url_for('student.menu', vendor_id=vendor.id, category=cat) }}" class="btn btn-sm {{ 'btn-primary' if selected_category == cat else 'btn-outline-secondary' }}">{{ cat }}</a>
+      {% endfor %}
+    </div>
+
+    <form method="GET" action="{{ url_for('student.menu', vendor_id=vendor.id) }}" class="d-flex gap-2">
+      {% if selected_category %}<input type="hidden" name="category" value="{{ selected_category }}">{% endif %}
+      <input type="text" name="search" class="form-control form-control-sm" placeholder="Search food..." value="{{ search_query }}">
+      <button type="submit" class="btn btn-sm btn-primary"><i class="fa-solid fa-search"></i></button>
+    </form>
+  </div>
+
+  <!-- Menu Cards Grid -->
+  <div class="row g-4">
+    {% for item in menu_items %}
+      <div class="col-md-4">
+        <div class="card-custom p-3 h-100 d-flex flex-column justify-content-between">
+          <div>
+            <div class="d-flex justify-content-between align-items-start mb-2">
+              <h5 class="fw-bold mb-0 text-dark">{{ item.name }}</h5>
+              <span class="badge bg-warning text-dark"><i class="fa-solid fa-fire me-1"></i> Popular</span>
+            </div>
+            <p class="small text-muted mb-3">{{ item.description }}</p>
+
+            <div class="d-flex justify-content-between align-items-center mb-3 bg-light p-2 rounded">
+              <span class="fs-4 fw-bold text-primary">₹{{ "%.0f"|format(item.price) }}</span>
+              <div class="text-end small">
+                <span class="text-muted d-block"><i class="fa-solid fa-clock text-info me-1"></i> Prep: {{ item.prep_time }} min</span>
+                <span class="text-success font-weight-bold">Available (Stock: {{ item.stock }})</span>
+              </div>
+            </div>
+          </div>
+
+          <button onclick="addToCart({{ item.id }})" class="btn btn-primary w-100 fw-bold py-2">
+            <i class="fa-solid fa-cart-plus me-1"></i> ADD TO CART
+          </button>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

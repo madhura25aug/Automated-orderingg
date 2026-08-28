@@ -1,0 +1,161 @@
+{% extends "base.html" %}
+
+{% block title %}Hackathon Demo Mode - CanteenFlow AI{% endblock %}
+
+{% block content %}
+<div class="container py-3">
+  <div class="card-custom p-4 bg-dark text-white mb-4">
+    <div class="d-flex justify-content-between align-items-center">
+      <div>
+        <h2 class="fw-bold mb-1"><i class="fa-solid fa-bolt text-warning me-2"></i> Hackathon Demo Mode</h2>
+        <p class="text-light mb-0">Experience the entire AI canteen flow in seconds with 1-click actions.</p>
+      </div>
+      <span class="badge bg-warning text-dark fs-6 px-3 py-2">Judges Fast-Track</span>
+    </div>
+  </div>
+
+  <!-- Role Login Shortcuts -->
+  <h4 class="fw-bold mb-3"><i class="fa-solid fa-users me-2"></i> 1. Quick Login Shortcuts</h4>
+  <div class="row g-3 mb-4">
+    <div class="col-md-4">
+      <a href="{{ url_for('auth.demo_login', role='student') }}" class="btn btn-outline-primary w-100 py-3 text-start card-custom text-decoration-none">
+        <div class="d-flex align-items-center">
+          <div class="fs-2 text-primary me-3"><i class="fa-solid fa-graduation-cap"></i></div>
+          <div>
+            <h5 class="fw-bold mb-0">Student Portal</h5>
+            <small class="text-muted">student@canteenflow.com</small>
+          </div>
+        </div>
+      </a>
+    </div>
+
+    <div class="col-md-4">
+      <a href="{{ url_for('auth.demo_login', role='vendor') }}" class="btn btn-outline-success w-100 py-3 text-start card-custom text-decoration-none">
+        <div class="d-flex align-items-center">
+          <div class="fs-2 text-success me-3"><i class="fa-solid fa-shop"></i></div>
+          <div>
+            <h5 class="fw-bold mb-0">Vendor Dashboard</h5>
+            <small class="text-muted">vendor@canteenflow.com</small>
+          </div>
+        </div>
+      </a>
+    </div>
+
+    <div class="col-md-4">
+      <a href="{{ url_for('auth.demo_login', role='admin') }}" class="btn btn-outline-purple w-100 py-3 text-start card-custom text-decoration-none">
+        <div class="d-flex align-items-center">
+          <div class="fs-2 text-purple me-3"><i class="fa-solid fa-chart-pie"></i></div>
+          <div>
+            <h5 class="fw-bold mb-0">Campus Admin</h5>
+            <small class="text-muted">admin@canteenflow.com</small>
+          </div>
+        </div>
+      </a>
+    </div>
+  </div>
+
+  <!-- AI & Simulator Interactive Actions -->
+  <h4 class="fw-bold mb-3"><i class="fa-solid fa-microchip me-2"></i> 2. Live AI & Simulator Controls</h4>
+  <div class="row g-4 mb-4">
+    <div class="col-md-6">
+      <div class="card-custom p-4 h-100">
+        <h5 class="fw-bold text-danger"><i class="fa-solid fa-fire me-2"></i> Lunch Rush Simulator</h5>
+        <p class="text-muted">Simulate 25 incoming orders instantly, spiking canteen crowd density to VERY BUSY 🔴 and triggering Smart Batches.</p>
+        <button onclick="runLunchRush()" class="btn btn-danger btn-lg w-100 fw-bold">
+          🔥 SIMULATE LUNCH RUSH
+        </button>
+        <div id="rush-results" class="mt-3 p-3 bg-light rounded d-none"></div>
+      </div>
+    </div>
+
+    <div class="col-md-6">
+      <div class="card-custom p-4 h-100">
+        <h5 class="fw-bold text-primary"><i class="fa-solid fa-brain me-2"></i> AI Demand Forecast</h5>
+        <p class="text-muted">Execute ML demand model prediction for 12:30 PM - 1:00 PM peak window to view item forecasts and stock shortage alerts.</p>
+        <button onclick="runDemoForecast()" class="btn btn-primary btn-lg w-100 fw-bold">
+          Run AI Demand Forecast
+        </button>
+        <div id="forecast-results" class="mt-3 p-3 bg-light rounded d-none"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card-custom p-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h5 class="fw-bold mb-0"><i class="fa-solid fa-clock text-info me-2"></i> QueueZero Optimization Demo</h5>
+      <button onclick="runOptimizeDemo()" class="btn btn-info text-white fw-bold">Optimize Pickup Slots</button>
+    </div>
+    <div id="optimize-results" class="p-3 bg-light rounded d-none"></div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function runLunchRush() {
+  const btn = event.target;
+  btn.disabled = true;
+  btn.innerText = "Simulating 25 Orders...";
+  fetch('/api/demo/rush', { method: 'POST' })
+    .then(r => r.json())
+    .then(data => {
+      btn.disabled = false;
+      btn.innerText = "🔥 SIMULATE LUNCH RUSH";
+      const el = document.getElementById('rush-results');
+      el.classList.remove('d-none');
+      el.innerHTML = `
+        <div class="alert alert-danger mb-0">
+          <strong>${data.message}</strong><br>
+          Crowd Level: ${data.crowd_level} | Wait Time: ${data.estimated_wait_mins} mins
+        </div>
+      `;
+    });
+}
+
+function runDemoForecast() {
+  const el = document.getElementById('forecast-results');
+  el.classList.remove('d-none');
+  el.innerHTML = '<div class="spinner-border spinner-border-sm me-2"></div> Analyzing historical orders... Generating ML forecast...';
+  setTimeout(() => {
+    fetch('/api/demo/forecast')
+      .then(r => r.json())
+      .then(data => {
+        el.innerHTML = `
+          <h6 class="fw-bold text-primary">AI FORECAST (${data.time_slot})</h6>
+          <p class="mb-1">Expected Orders: <strong>${data.expected_orders}</strong> (${data.demand_level})</p>
+          <ul class="small mb-2">
+            ${data.recommendations.map(r => `<li>${r.item}: <strong>${r.qty}</strong> units</li>`).join('')}
+          </ul>
+          <div class="p-2 bg-warning bg-opacity-25 rounded text-dark small">
+            <strong>⚠️ ${data.alert.shortage_item} Shortage Detected!</strong> ${data.alert.recommendation}
+          </div>
+        `;
+      });
+  }, 1000);
+}
+
+function runOptimizeDemo() {
+  fetch('/api/demo/optimize')
+    .then(r => r.json())
+    .then(data => {
+      const el = document.getElementById('optimize-results');
+      el.classList.remove('d-none');
+      el.innerHTML = `
+        <div class="row text-center">
+          <div class="col-md-6 border-end">
+            <span class="text-muted">Before QueueZero:</span>
+            <h4 class="text-danger fw-bold">${data.before_optimization_mins} mins wait</h4>
+          </div>
+          <div class="col-md-6">
+            <span class="text-muted">After QueueZero:</span>
+            <h4 class="text-success fw-bold">${data.after_optimization_mins} mins wait</h4>
+          </div>
+        </div>
+        <div class="alert alert-success mt-3 mb-0 text-center fw-bold">
+          🎉 ${data.reduction_pct}% reduction in estimated queue time!
+        </div>
+      `;
+    });
+}
+</script>
+{% endblock %}

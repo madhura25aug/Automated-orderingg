@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block title %}Vendor Analytics - {{ vendor.name }}{% endblock %}
+
+{% block content %}
+<div class="container py-3">
+  <h2 class="fw-bold mb-4"><i class="fa-solid fa-chart-line text-primary me-2"></i> Comprehensive Kitchen Analytics</h2>
+
+  <div class="row g-4 mb-4">
+    <div class="col-md-6">
+      <div class="card-custom p-4">
+        <h5 class="fw-bold mb-3">Popular Food Items Sold</h5>
+        <div style="height: 280px;">
+          <canvas id="chartPopularFoods"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-6">
+      <div class="card-custom p-4">
+        <h5 class="fw-bold mb-3">Orders & AI Demand Forecast</h5>
+        <div style="height: 280px;">
+          <canvas id="chartOrdersByHour"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+
+{% block title %}Group Order & Split Payment - CanteenFlow AI{% endblock %}
+
+{% block content %}
+<div class="container py-3">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h2 class="fw-bold mb-1"><i class="fa-solid fa-users text-primary me-2"></i> Group Ordering & Split Payment</h2>
+      <p class="text-muted mb-0">Order together with classmates and split the bill seamlessly</p>
+    </div>
+    <button onclick="createGroupOrder()" class="btn btn-primary btn-lg fw-bold">
+      <i class="fa-solid fa-plus me-1"></i> Create Group Order
+    </button>
+  </div>
+
+  <div class="row g-4 mb-4">
+    <!-- Join Existing Group Card -->
+    <div class="col-md-6">
+      <div class="card-custom p-4">
+        <h5 class="fw-bold mb-2"><i class="fa-solid fa-right-to-bracket text-success me-2"></i> Join a Friend's Group</h5>
+        <p class="text-muted small mb-3">Enter the 6-character group code shared by your friend (e.g. <code>CF-4821</code>).</p>
+        <div class="input-group input-group-lg">
+          <input type="text" id="group-code-input" class="form-control text-uppercase" placeholder="CF-4821">
+          <button onclick="joinGroupOrder()" class="btn btn-success fw-bold">Join Group</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Group Ordering Benefits -->
+    <div class="col-md-6">
+      <div class="card-custom p-4 bg-primary bg-opacity-10 border-primary">
+        <h5 class="fw-bold text-primary mb-2"><i class="fa-solid fa-wand-magic-sparkles me-2"></i> How Group Orders Work</h5>
+        <ul class="small mb-0 text-dark">
+          <li>1. Creator generates unique Group Code</li>
+          <li>2. Friends join and select their own meals</li>
+          <li>3. Each person pays their individual split via UPI/Card</li>
+          <li>4. Kitchen batches all items together for single pickup</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- Active Group Orders List -->
+  <h4 class="fw-bold mb-3">Your Active Group Orders</h4>
+  {% if not active_groups %}
+    <div class="card-custom p-4 text-center text-muted">
+      <p class="mb-0">No active group orders. Click "Create Group Order" to start one!</p>
+    </div>
+  {% else %}
+    {% for group in active_groups %}
+      <div class="card-custom p-4 mb-3">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <div>
+            <h5 class="fw-bold mb-0">Group Code: <span class="badge bg-primary fs-6">{{ group.group_code }}</span></h5>
+            <small class="text-muted">Created by {{ group.creator.name }}</small>
+          </div>
+          <span class="badge bg-success">Status: {{ group.status }}</span>
+        </div>
+
+        <h6 class="fw-bold text-muted small">MEMBER SPLIT STATUS:</h6>
+        <div class="table-responsive">
+          <table class="table table-bordered align-middle">
+            <thead class="table-light">
+              <tr>
+                <th>Member</th>
+                <th>Share Amount</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for m in group.members %}
+                <tr>
+                  <td><strong>{{ m.user.name }}</strong></td>
+                  <td>₹{{ "%.0f"|format(m.amount) }}</td>
+                  <td>
+                    {% if m.status == 'PAID' %}
+                      <span class="badge bg-success">PAID ✓</span>
+                    {% else %}
+                      <span class="badge bg-warning text-dark">PENDING</span>
+                    {% endif %}
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    {% endfor %}
+  {% endif %}
+</div>
+{% endblock %}

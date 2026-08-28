@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+
+{% block title %}Campus Admin Dashboard - CanteenFlow AI{% endblock %}
+
+{% block content %}
+<div class="container py-3">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h2 class="fw-bold mb-1"><i class="fa-solid fa-shield-halved text-purple me-2"></i> Campus Administration Overview</h2>
+      <p class="text-muted mb-0">Campus-wide dining metrics, queue congestion monitoring, and eco sustainability metrics</p>
+    </div>
+  </div>
+
+  <!-- Key Campus Stat Cards -->
+  <div class="row g-3 mb-4">
+    <div class="col-md-3">
+      <div class="card-custom p-3">
+        <span class="text-muted small fw-bold uppercase">Total Students Registered</span>
+        <div class="fs-2 fw-bold text-dark mt-1">{{ total_students }}</div>
+        <small class="text-muted">Active app users</small>
+      </div>
+    </div>
+
+    <div class="col-md-3">
+      <div class="card-custom p-3">
+        <span class="text-muted small fw-bold uppercase">Canteen Vendors</span>
+        <div class="fs-2 fw-bold text-primary mt-1">{{ total_vendors }}</div>
+        <small class="text-muted">Onboarded outlets</small>
+      </div>
+    </div>
+
+    <div class="col-md-3">
+      <div class="card-custom p-3">
+        <span class="text-muted small fw-bold uppercase">Campus Total Revenue</span>
+        <div class="fs-2 fw-bold text-success mt-1">₹{{ "%.0f"|format(total_revenue) }}</div>
+        <small class="text-muted">Simulated payments</small>
+      </div>
+    </div>
+
+    <div class="col-md-3">
+      <div class="card-custom p-3 border-success bg-success bg-opacity-10">
+        <span class="text-success small fw-bold uppercase">Food Waste Saved</span>
+        <div class="fs-2 fw-bold text-success mt-1">{{ waste_summary.meals_saved }} Meals</div>
+        <small class="text-success fw-bold">🌱 {{ waste_summary.waste_reduction_pct }}% Reduction</small>
+      </div>
+    </div>
+  </div>
+
+  <!-- Vendor Comparison Table -->
+  <h4 class="fw-bold mb-3">Campus Vendor Performance</h4>
+  <div class="card-custom p-4">
+    <div class="table-responsive">
+      <table class="table table-hover align-middle">
+        <thead class="table-light">
+          <tr>
+            <th>Vendor Outlet</th>
+            <th>Location</th>
+            <th>Total Orders</th>
+            <th>Revenue</th>
+            <th>Avg Prep Time</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for stat in vendor_stats %}
+            <tr>
+              <td><strong>{{ stat.vendor.name }}</strong></td>
+              <td>{{ stat.vendor.location }}</td>
+              <td><span class="badge bg-primary fs-6">{{ stat.order_count }}</span></td>
+              <td><strong class="text-success">₹{{ "%.0f"|format(stat.revenue) }}</strong></td>
+              <td>{{ stat.vendor.average_prep_time }} mins</td>
+              <td><span class="badge bg-success">OPERATIONAL</span></td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

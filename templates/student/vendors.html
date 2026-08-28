@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block title %}Browse Campus Canteens - CanteenFlow AI{% endblock %}
+
+{% block content %}
+<div class="container py-3">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h2 class="fw-bold mb-1"><i class="fa-solid fa-store text-primary me-2"></i> Campus Canteen Outlets</h2>
+      <p class="text-muted mb-0">Select a vendor to browse menu and order ahead</p>
+    </div>
+
+    <!-- Search Form -->
+    <form method="GET" action="{{ url_for('student.vendors') }}" class="d-flex gap-2">
+      <input type="text" name="search" class="form-control" placeholder="Search canteen name..." value="{{ search_query }}">
+      <button type="submit" class="btn btn-primary"><i class="fa-solid fa-magnifying-glass"></i></button>
+    </form>
+  </div>
+
+  <div class="row g-4">
+    {% for vendor in vendors %}
+      {% set c_info = crowd_info.get(vendor.id, {}) %}
+      <div class="col-md-6">
+        <div class="card-custom p-4 h-100 d-flex flex-column justify-content-between">
+          <div>
+            <div class="d-flex justify-content-between align-items-start mb-2">
+              <h4 class="fw-bold mb-0">{{ vendor.name }}</h4>
+              <span class="badge bg-{{ c_info.get('badge_class', 'success') }} px-3 py-2 fs-6">
+                {{ c_info.get('level', 'LOW 🟢') }}
+              </span>
+            </div>
+            <p class="text-muted small mb-2"><i class="fa-solid fa-location-dot text-danger me-1"></i> {{ vendor.location }}</p>
+            <p class="text-secondary mb-3">{{ vendor.description }}</p>
+
+            <div class="row g-2 mb-3 bg-light p-2 rounded text-center small">
+              <div class="col-6 border-end">
+                <span class="text-muted">Avg Prep Time</span><br>
+                <strong class="text-dark">{{ vendor.average_prep_time }} Mins</strong>
+              </div>
+              <div class="col-6">
+                <span class="text-muted">Current Queue</span><br>
+                <strong class="text-primary">{{ c_info.get('active_orders', 0) }} Orders Ahead</strong>
+              </div>
+            </div>
+          </div>
+
+          <a href="{{ url_for('student.menu', vendor_id=vendor.id) }}" class="btn btn-primary btn-lg w-100 fw-bold">
+            <i class="fa-solid fa-utensils me-2"></i> Browse Menu & Order
+          </a>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

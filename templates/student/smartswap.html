@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+
+{% block title %}SmartSwap Marketplace - CanteenFlow AI{% endblock %}
+
+{% block content %}
+<div class="container py-3">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h2 class="fw-bold mb-1"><i class="fa-solid fa-rotate text-warning me-2"></i> SmartSwap Marketplace</h2>
+      <p class="text-muted mb-0">Can't collect your meal? Offer it to fellow students to eliminate food waste & earn Eco Points!</p>
+    </div>
+    <div class="card-custom px-3 py-2 bg-warning bg-opacity-10 text-dark fw-bold">
+      <i class="fa-solid fa-leaf text-success me-1"></i> Earn +15 Eco Points per Swap
+    </div>
+  </div>
+
+  <!-- Available Swaps Grid -->
+  <h4 class="fw-bold mb-3"><i class="fa-solid fa-store me-2"></i> Available Meals to Claim</h4>
+  {% if not available_swaps %}
+    <div class="card-custom p-5 text-center mb-5">
+      <div class="fs-1 text-muted mb-2"><i class="fa-solid fa-utensils"></i></div>
+      <h5 class="fw-bold text-muted">No SmartSwap meals offered right now</h5>
+      <p class="text-secondary mb-0">Check back during peak lunch hours (12:30 PM - 1:30 PM).</p>
+    </div>
+  {% else %}
+    <div class="row g-4 mb-5">
+      {% for swap in available_swaps %}
+        <div class="col-md-4">
+          <div class="card-custom p-4 h-100 d-flex flex-column justify-content-between border-warning">
+            <div>
+              <div class="d-flex justify-content-between align-items-start mb-2">
+                <h5 class="fw-bold mb-0">Order #{{ swap.order.order_number }}</h5>
+                <span class="badge bg-warning text-dark"><i class="fa-solid fa-bolt me-1"></i> Available</span>
+              </div>
+              <p class="small text-muted mb-2"><i class="fa-solid fa-user me-1"></i> Offered by {{ swap.owner.name }}</p>
+
+              <div class="bg-light p-3 rounded mb-3">
+                <strong class="d-block text-muted small mb-1">MEAL INCLUDED:</strong>
+                {% for item in swap.order.items %}
+                  <span class="d-block font-weight-bold text-dark">• {{ item.menu_item.name }} × {{ item.quantity }}</span>
+                {% endfor %}
+              </div>
+
+              <div class="d-flex justify-content-between align-items-center mb-3">
+                <span class="fs-4 fw-bold text-primary">₹{{ "%.0f"|format(swap.order.total) }}</span>
+                <span class="small text-muted">Pickup before: <strong>{{ swap.order.pickup_time }}</strong></span>
+              </div>
+            </div>
+
+            <button onclick="claimSmartSwap({{ swap.id }})" class="btn btn-warning btn-lg w-100 fw-bold">
+              <i class="fa-solid fa-hand-holding-heart me-1"></i> Claim Order
+            </button>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  <!-- My Listed Swaps -->
+  <h4 class="fw-bold mb-3">My Offered Swaps</h4>
+  {% if not my_swaps %}
+    <div class="card-custom p-4 text-center text-muted">
+      <p class="mb-0">You have not listed any orders for SmartSwap. You can offer orders directly from the "My Orders" tab.</p>
+    </div>
+  {% else %}
+    <div class="row g-3">
+      {% for swap in my_swaps %}
+        <div class="col-md-6">
+          <div class="card-custom p-3">
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <h6 class="fw-bold mb-0">Order #{{ swap.order.order_number }}</h6>
+                <small class="text-muted">Listed at {{ swap.created_at.strftime('%H:%M:%S') }}</small>
+              </div>
+              <span class="badge bg-{{ 'success' if swap.status == 'CLAIMED' else 'warning text-dark' }}">
+                {{ swap.status }}
+              </span>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+</div>
+{% endblock %}
