@@ -99,23 +99,5 @@ Open your browser and navigate to **[http://127.0.0.1:5000](http://127.0.0.1:500
 
 ---
 
-## 🎬 3-Minute Hackathon Presentation Script
 
-1. **[0:00 - 0:30] Problem statement:** Show the Landing Page (`/`). Explain campus lunch rush congestion and why traditional food delivery apps fail at campus dining.
-2. **[0:30 - 1:15] Student QueueZero Experience:** Click `/demo` -> Login as **Student**. Browse South Indian Corner menu, add Masala Dosa to cart. Show the QueueZero timeline: *"Leave classroom at 12:38 PM, pickup at Counter 2 at 12:42 PM."*
-3. **[1:15 - 2:00] Lunch Rush Simulator & Vendor Live Board:** Open `/demo` and click **🔥 SIMULATE LUNCH RUSH**. Switch to Vendor Dashboard -> **Live Order Board**. Watch 25 incoming orders populate the Kanban board. Move an order from `PREPARING` to `READY` and show real-time SocketIO WebSocket updates.
-4. **[2:00 - 2:45] AI Demand Prediction & Canteen Copilot:** Click **Run AI Demand Forecast** to show peak window predictions and sandwich shortage warnings. Open **Canteen Copilot** (`/vendor/copilot`) and click *"What should I prepare now?"* to display live AI preparation advice.
-5. **[2:45 - 3:00] Sustainability & Conclusion:** Show SmartSwap meal transfers, Eco Points (+20 points for food donation), and Admin Campus Analytics.
 
----
-
-## ❓ Possible Judge Questions & Answers
-
-**Q1: How is your ML model trained and how accurate is it?**
-*Answer:* We train a `RandomForestRegressor` model using `scikit-learn` on historical order logs parameterized by hour of day, day of week, vendor, and item ID. It provides realistic demand predictions and confidence scores to prevent stockouts.
-
-**Q2: How does QueueZero prevent crowding at pickup counters?**
-*Answer:* Rather than having all students arrive simultaneously, QueueZero dynamically staggers recommended pickup slots based on active kitchen load, prep times, and walking distance, spreading counter arrivals evenly.
-
-**Q3: Does the real-time order tracking require page refreshes?**
-*Answer:* No, real-time status updates use `Flask-SocketIO` WebSockets. When a vendor updates an order status on their Kanban board, student tracking pages and notification toasts update instantly across all connected clients.
